@@ -1,3 +1,4 @@
+import argparse
 import asyncio
 import websockets
 import cbor2
@@ -5,13 +6,14 @@ import sqlite3
 import json
 import datetime
 
-#JETSTREAM_URI = "wss://bsky.network/xrpc/com.atproto.sync.subscribeRepos"
 JETSTREAM_URI = "wss://jetstream1.us-west.bsky.network/subscribe"
 TARGET_COLLECTION = "app.bsky.feed.post"
+DB_PATH = "bluesky_posts.db"
 
 # Set up SQLite DB
 def init_db():
-    conn = sqlite3.connect("bluesky_posts.db")
+    print("Connecting to databse ", DB_PATH)
+    conn = sqlite3.connect(DB_PATH)
     conn.execute("PRAGMA journal_mode=WAL;")
     c = conn.cursor()
     c.execute('''
@@ -78,4 +80,21 @@ async def listen_and_store():
                     conn.commit()
 
 if __name__ == "__main__":
+    # ----------------------------------------
+    # Parse command line
+    # ----------------------------------------
+    parser = argparse.ArgumentParser(
+        description="Ingest Bluesky posts or generate embeddings."
+    )
+
+    parser.add_argument(
+        "--db-path",
+        type=str,
+        default=DB_PATH,
+        help="Path to the SQLite database file."
+    )
+
+    args = parser.parse_args()
+    DB_PATH = args.db_path
+
     asyncio.run(listen_and_store())

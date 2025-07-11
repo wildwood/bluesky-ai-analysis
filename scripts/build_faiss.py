@@ -1,3 +1,4 @@
+import argparse
 import sqlite3
 import json
 import numpy as np
@@ -14,6 +15,23 @@ META_PATH = Path("faiss_index/metadata.json")
 INDEX_PATH.parent.mkdir(exist_ok=True)
 
 EMBEDDING_DIM = 384  # for MiniLM
+
+# ----------------------------------------
+# Parse command line
+# ----------------------------------------
+parser = argparse.ArgumentParser(
+    description="Ingest Bluesky posts or generate embeddings."
+)
+
+parser.add_argument(
+    "--db-path",
+    type=str,
+    default=DB_PATH,
+    help="Path to the SQLite database file."
+)
+
+args = parser.parse_args()
+DB_PATH = args.db_path
 
 # ----------------------------------------
 # Connect to DB

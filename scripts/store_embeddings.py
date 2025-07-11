@@ -1,3 +1,4 @@
+import argparse
 import sqlite3
 import json
 from sentence_transformers import SentenceTransformer
@@ -8,6 +9,23 @@ from sentence_transformers import SentenceTransformer
 DB_PATH = "bluesky_posts.db"
 MODEL_NAME = "all-MiniLM-L6-v2"
 BATCH_SIZE = 32  # Small batches are efficient for local inference
+
+# ----------------------------------------
+# Parse command line
+# ----------------------------------------
+parser = argparse.ArgumentParser(
+    description="Ingest Bluesky posts or generate embeddings."
+)
+
+parser.add_argument(
+    "--db-path",
+    type=str,
+    default=DB_PATH,
+    help="Path to the SQLite database file."
+)
+
+args = parser.parse_args()
+DB_PATH = args.db_path
 
 # ----------------------------------------
 # Load model
