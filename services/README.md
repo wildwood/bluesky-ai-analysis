@@ -29,39 +29,27 @@ User= → your real Linux user name (e.g. ubuntu or davidbrandt).
 
 Anytime you change a .service file:
 
-bash
-Copy
-Edit
 sudo systemctl daemon-reload
+
 4️⃣ Start the service
 
-bash
-Copy
-Edit
 sudo systemctl start bluesky-ingest
+
 Check status:
-
-bash
-Copy
-Edit
 sudo systemctl status bluesky-ingest
-Follow logs live:
 
-bash
-Copy
-Edit
+Follow logs live:
 sudo journalctl -u bluesky-ingest -f
+
 5️⃣ Enable auto-start on boot
 
-bash
-Copy
-Edit
 sudo systemctl enable bluesky-ingest
+
 6️⃣ Common commands
 
-Command	Purpose
+Command                                 Purpose
 sudo systemctl start yourservice	Start it now
-sudo systemctl stop yourservice	Stop it now
+sudo systemctl stop yourservice	    Stop it now
 sudo systemctl restart yourservice	Restart after edits
 sudo systemctl status yourservice	See status & recent logs
 sudo journalctl -u yourservice -f	Follow logs in real time
