@@ -6,7 +6,8 @@ torch environment.
 
 ```bash
 # Create the venv
-python3 -m venv .venv
+python3 -m venv .venv # for core env
+python3.11 -m venv .venv-torch # for huggingface env
 
 # Activate the venv
 source .venv/bin/activate
