@@ -27,7 +27,8 @@ def init_db():
             text TEXT,
             langs TEXT,
             raw_json TEXT,
-            embedding TEXT
+            embedding TEXT,
+            embedding_blob BLOB
         );
     ''')
     c.execute('''

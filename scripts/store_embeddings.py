@@ -1,6 +1,7 @@
 import argparse
 import sqlite3
 import json
+import numpy as np
 from sentence_transformers import SentenceTransformer
 
 # ----------------------------------------
@@ -71,13 +72,15 @@ for i in range(0, len(texts), BATCH_SIZE):
     embeddings = model.encode(batch_texts, show_progress_bar=False)
 
     for uri, embedding in zip(batch_uris, embeddings):
-        embedding_json = json.dumps(embedding.tolist())
+        vector = np.array(embedding, dtype=np.float32)
+        # Pack to bytes
+        embedding_blob = vector.tobytes()
 
         cursor.execute("""
             UPDATE posts
-            SET embedding = ?
+            SET embedding_blob = ?
             WHERE uri = ?
-        """, (embedding_json, uri))
+        """, (embedding_blob, uri))
 
     conn.commit()
     if i // BATCH_SIZE % 10 == 0:

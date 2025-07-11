@@ -41,9 +41,9 @@ conn.execute("PRAGMA journal_mode=WAL;")
 cursor = conn.cursor()
 
 cursor.execute("""
-    SELECT uri, embedding, text
+    SELECT uri, embedding_blob, text
     FROM posts
-    WHERE embedding IS NOT NULL
+    WHERE embedding_blob IS NOT NULL
 """)
 
 rows = cursor.fetchall()
@@ -55,8 +55,8 @@ print(f"Loaded {len(rows)} embeddings.")
 embeddings = []
 metadata = []
 
-for uri, embedding_json, text in rows:
-    vector = np.array(json.loads(embedding_json), dtype=np.float32)
+for uri, embedding_blob, text in rows:
+    vector = np.frombuffer(embedding_blob, dtype=np.float32)
     embeddings.append(vector)
     metadata.append({"uri": uri, "text": text})
 
