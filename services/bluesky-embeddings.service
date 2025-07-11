@@ -1,0 +1,13 @@
+[Unit]
+Description=Bluesky Embeddings Service
+After=network.target
+
+[Service]
+WorkingDirectory=/home/blueskai/bluesky-ai-analysis
+ExecStart=/home/blueskai/bluesky-ai-analysis/.venv-torch/bin/python scripts/store_embeddings.py --db-path /mnt/ingestion/database/bluesky_posts.db
+Restart=always
+User=blueskai
+
+[Install]
+WantedBy=multi-user.target
+

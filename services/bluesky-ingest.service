@@ -1,0 +1,13 @@
+[Unit]
+Description=Bluesky Ingest Service
+After=network.target
+
+[Service]
+WorkingDirectory=/home/blueskai/bluesky-ai-analysis
+ExecStart=/home/blueskai/bluesky-ai-analysis/.venv/bin/python scripts/bluesky_ingest.py --db-path /mnt/ingestion/database/bluesky_posts.db
+Restart=always
+User=blueskai
+
+[Install]
+WantedBy=multi-user.target
+
