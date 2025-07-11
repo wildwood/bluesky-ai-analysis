@@ -62,7 +62,6 @@ async def listen_and_store():
                     text = record.get("text", "")
                     created_at = record.get("createdAt", "")
                     langs = ",".join(record.get("langs", [])) if "langs" in record else None
-                    raw_json = json.dumps(record)
 
                     #print(f"Inserting post: {text[:40]}...")
 
@@ -73,9 +72,9 @@ async def listen_and_store():
                     c = conn.cursor()
                     c.execute('''
                         INSERT OR IGNORE INTO posts
-                        (uri, repo, rkey, created_at, created_date, created_hour, text, langs, raw_json)
+                        (uri, repo, rkey, created_at, created_date, created_hour, text, langs)
                         VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?)
-                    ''', (post_uri, data["did"], rkey, created_at, created_date, created_hour, text, langs, raw_json))
+                    ''', (post_uri, data["did"], rkey, created_at, created_date, created_hour, text, langs))
 
                     conn.commit()
 
