@@ -73,7 +73,7 @@ async def listen_and_store():
                     c.execute('''
                         INSERT OR IGNORE INTO posts
                         (uri, repo, rkey, created_at, created_date, created_hour, text, langs)
-                        VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?)
+                        VALUES (?, ?, ?, ?, ?, ?, ?, ?)
                     ''', (post_uri, data["did"], rkey, created_at, created_date, created_hour, text, langs))
 
                     conn.commit()
