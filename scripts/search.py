@@ -1,6 +1,8 @@
+import argparse
 import faiss
 import json
 import numpy as np
+from pathlib import Path
 from sentence_transformers import SentenceTransformer
 
 import torch
@@ -9,16 +11,35 @@ torch.set_num_threads(1)
 # ------------------------
 # Config
 # ------------------------
-INDEX_PATH = "faiss_index/index.faiss"
-META_PATH = "faiss_index/metadata.json"
+INDEX_DIR = "faiss_index"
 MODEL_NAME = "all-MiniLM-L6-v2"
 TOP_K = 5
+
+# ----------------------------------------
+# Parse command line
+# ----------------------------------------
+parser = argparse.ArgumentParser(
+    description="Search on built search index."
+)
+
+parser.add_argument(
+    "--index-dir",
+    type=str,
+    default=INDEX_DIR,
+    help="Directory to put search index files into."
+)
+
+args = parser.parse_args()
+index_dir = Path(INDEX_DIR)
+index_dir.mkdir(exist_ok=True)
+INDEX_PATH = index_dir / "index.faiss"
+META_PATH = index_dir / "metadata.json"
 
 # ------------------------
 # Load index + metadata
 # ------------------------
-print("Loading FAISS index...")
-index = faiss.read_index(INDEX_PATH)
+print("Loading FAISS index at... ", INDEX_PATH)
+index = faiss.read_index(str(INDEX_PATH))
 
 with open(META_PATH) as f:
     metadata = json.load(f)

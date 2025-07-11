@@ -9,10 +9,7 @@ from pathlib import Path
 # Config
 # ----------------------------------------
 DB_PATH = "bluesky_posts.db"
-INDEX_PATH = Path("faiss_index/index.faiss")
-META_PATH = Path("faiss_index/metadata.json")
-
-INDEX_PATH.parent.mkdir(exist_ok=True)
+INDEX_DIR = "faiss_index"
 
 EMBEDDING_DIM = 384  # for MiniLM
 
@@ -20,7 +17,7 @@ EMBEDDING_DIM = 384  # for MiniLM
 # Parse command line
 # ----------------------------------------
 parser = argparse.ArgumentParser(
-    description="Ingest Bluesky posts or generate embeddings."
+    description="Build search index of Bluesky posts from embeddings."
 )
 
 parser.add_argument(
@@ -29,9 +26,19 @@ parser.add_argument(
     default=DB_PATH,
     help="Path to the SQLite database file."
 )
+parser.add_argument(
+    "--index-dir",
+    type=str,
+    default=INDEX_DIR,
+    help="Directory to put search index files into."
+)
 
 args = parser.parse_args()
 DB_PATH = args.db_path
+index_dir = Path(INDEX_DIR)
+index_dir.mkdir(exist_ok=True)
+INDEX_PATH = index_dir / "index.faiss"
+META_PATH = index_dir / "metadata.json"
 
 # ----------------------------------------
 # Connect to DB
