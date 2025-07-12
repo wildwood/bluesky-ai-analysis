@@ -6,6 +6,7 @@ After=network.target
 WorkingDirectory=/home/blueskai/bluesky-ai-analysis
 ExecStart=/home/blueskai/bluesky-ai-analysis/.venv-torch/bin/python scripts/store_embeddings.py --db-path /mnt/ingestion/database/bluesky_posts.db
 Restart=always
+# Force HF_HOME to keep models off root volume
 Environment="HF_HOME=/mnt/ingestion/hf_cache"
 User=blueskai
 
