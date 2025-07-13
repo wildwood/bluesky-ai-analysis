@@ -17,3 +17,6 @@ pip install -r requirements.txt
 
 # Deactivate when done
 deactivate
+
+# Export new requirements
+pip freeze > requirements.txt
