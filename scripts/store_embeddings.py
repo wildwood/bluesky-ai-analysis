@@ -1,7 +1,5 @@
 import argparse
 import sqlite3
-import json
-from zipimport import MAX_COMMENT_LEN
 
 import numpy as np
 from sentence_transformers import SentenceTransformer
