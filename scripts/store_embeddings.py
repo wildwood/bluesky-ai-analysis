@@ -1,6 +1,8 @@
 import argparse
 import sqlite3
 import json
+from zipimport import MAX_COMMENT_LEN
+
 import numpy as np
 from sentence_transformers import SentenceTransformer
 
@@ -10,6 +12,7 @@ from sentence_transformers import SentenceTransformer
 DB_PATH = "bluesky_posts.db"
 MODEL_NAME = "all-MiniLM-L6-v2"
 BATCH_SIZE = 32  # Small batches are efficient for local inference
+MAX_COMMENT_LEN = 300
 
 # ----------------------------------------
 # Parse command line
@@ -61,7 +64,7 @@ if not rows:
 # Embed in batches
 # ----------------------------------------
 uris = [row[0] for row in rows]
-texts = [row[1] for row in rows]
+texts = [row[1][:MAX_COMMENT_LEN] for row in rows]
 
 print(f"Embedding {len(texts)} posts...")
 
