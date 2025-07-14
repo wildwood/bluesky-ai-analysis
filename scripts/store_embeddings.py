@@ -1,10 +1,12 @@
 import argparse
 import logging
 import sqlite3
+import sys
 
 import numpy as np
 from sentence_transformers import SentenceTransformer
 
+logging.basicConfig(stream=sys.stdout, level=logging.INFO, format='%(asctime)s - %(levelname)s - %(message)s')
 logger = logging.getLogger(__name__)
 
 # ----------------------------------------
