@@ -30,6 +30,7 @@ def build_live_link(uri):
 DB_PATH = "bluesky_posts.db"
 CURRENT_DATE = datetime.date.today()
 DAYS_BACK = 3
+OUTPUT_DIR = "."
 
 # ----------------------------------------
 # Parse command line
@@ -50,11 +51,18 @@ parser.add_argument(
     default=CURRENT_DATE.strftime(DATE_FORMAT_STRING),
     help="Latest date to start export from.  ('YYYY-MM-DD')"
 )
+parser.add_argument(
+    "--output-dir",
+    type=str,
+    default= OUTPUT_DIR,
+    help="Directory for output files.  Needs to already exist."
+)
 
 args = parser.parse_args()
 DB_PATH = args.db_path
 CURRENT_DATE = datetime.datetime.strptime(args.current_date, DATE_FORMAT_STRING)
 days = get_date_strings(CURRENT_DATE, DAYS_BACK)
+OUTPUT_DIR = args.output_dir
 
 conn = sqlite3.connect(DB_PATH)
 cursor = conn.cursor()
@@ -85,7 +93,7 @@ for day in days:
         df["post_url"] = df["uri"].apply(build_live_link)
 
         # Export to Parquet
-        filename = f"posts-{day}-{hour}.parquet"
+        filename = f"{OUTPUT_DIR}/posts-{day}-{hour:0>2}.parquet"
         df.to_parquet(filename, index=False)
         print(f"Export complete for {day} {hour}. Rows written:", len(df))
     print(f"Finished with day {day}")
