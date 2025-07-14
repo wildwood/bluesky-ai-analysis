@@ -17,7 +17,7 @@ def get_date_strings(last_date, numDays):
 
 DB_PATH = "bluesky_posts.db"
 CURRENT_DATE = datetime.date.today()
-DAYS_BACK = 3
+DAYS_BACK = 1#3
 
 # ----------------------------------------
 # Parse command line
@@ -57,6 +57,7 @@ query = f"""
         SELECT uri, created_at, created_date, created_hour, text, embedding_blob
         FROM mydb.posts
         WHERE created_date in ({escaped_days})
+        AND created_hour = 19
         AND embedding_blob IS NOT NULL
 """
 print("Executing query: ", query)
