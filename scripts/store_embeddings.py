@@ -1,4 +1,5 @@
 import argparse
+import logging
 import sqlite3
 
 import numpy as np
@@ -32,7 +33,7 @@ DB_PATH = args.db_path
 # ----------------------------------------
 # Load model
 # ----------------------------------------
-print(f"Loading embedding model: {MODEL_NAME}")
+logging.info(f"Loading embedding model: {MODEL_NAME}")
 model = SentenceTransformer(MODEL_NAME)
 
 # ----------------------------------------
@@ -52,10 +53,10 @@ cursor.execute("""
     LIMIT 30000;
 """)
 rows = cursor.fetchall()
-print(f"Loaded {len(rows)} posts without embeddings.")
+logging.info(f"Loaded {len(rows)} posts without embeddings.")
 
 if not rows:
-    print("Nothing to embed — exiting.")
+    logging.info("Nothing to embed — exiting.")
     exit(0)
 
 # ----------------------------------------
@@ -64,7 +65,7 @@ if not rows:
 uris = [row[0] for row in rows]
 texts = [row[1][:MAX_COMMENT_LEN] for row in rows]
 
-print(f"Embedding {len(texts)} posts...")
+logging.info(f"Embedding {len(texts)} posts...")
 
 for i in range(0, len(texts), BATCH_SIZE):
     batch_texts = texts[i:i + BATCH_SIZE]
@@ -85,10 +86,10 @@ for i in range(0, len(texts), BATCH_SIZE):
 
     conn.commit()
     if i // BATCH_SIZE % 10 == 0:
-        print(f"Committed batch {i // BATCH_SIZE + 1}")
+        logging.info(f"Committed batch {i // BATCH_SIZE + 1}")
 
 # ----------------------------------------
 # Done
 # ----------------------------------------
-print("All embeddings saved.")
+logging.info("All embeddings saved.")
 conn.close()
