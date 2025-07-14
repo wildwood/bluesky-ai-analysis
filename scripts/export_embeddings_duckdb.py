@@ -5,6 +5,8 @@ import sqlite3
 import numpy as np
 import pandas as pd
 
+import psutil
+
 DATE_FORMAT_STRING = "%Y-%m-%d"
 
 def get_date_strings(last_date, numDays):
@@ -77,7 +79,7 @@ query = f"""
 
 for day in days:
     for hour in range(24):
-        print(f"Starting sqlite query for {day} {hour}")
+        print(f"Starting sqlite query for {day} {hour:0>2}")
         cursor.execute(query, (day, hour))
         rows = cursor.fetchall()
         print("Finished sqlite query")
@@ -88,6 +90,8 @@ for day in days:
         ])
         print(f"Loaded {len(df)} rows from SQLite")
 
+        print("Memory used: ", psutil.virtual_memory())
+
         df["embedding"] = df["embedding_blob"].apply(decode_embedding)
         df = df.drop(columns=["embedding_blob"])
         df["post_url"] = df["uri"].apply(build_live_link)
@@ -95,7 +99,7 @@ for day in days:
         # Export to Parquet
         filename = f"{OUTPUT_DIR}/posts-{day}-{hour:0>2}.parquet"
         df.to_parquet(filename, index=False)
-        print(f"Export complete for {day} {hour}. Rows written:", len(df))
+        print(f"Export complete for {day} {hour:0>2}. Rows written:", len(df))
     print(f"Finished with day {day}")
 
 conn.close()
