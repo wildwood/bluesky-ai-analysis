@@ -8,6 +8,7 @@ from sentence_transformers import SentenceTransformer
 
 logging.basicConfig(stream=sys.stdout, level=logging.INFO, format='%(asctime)s - %(levelname)s - %(message)s')
 logger = logging.getLogger(__name__)
+logger.info("Logger created.")
 
 # ----------------------------------------
 # Config
@@ -52,7 +53,7 @@ cursor = conn.cursor()
 # ----------------------------------------
 cursor.execute("""
     SELECT uri, text FROM posts
-    WHERE embedding IS NULL AND LENGTH(text) > 10 AND langs='en'
+    WHERE embedding_blob IS NULL AND LENGTH(text) > 10 AND langs='en'
     ORDER BY created_date DESC, created_hour DESC
     LIMIT 30000;
 """)
