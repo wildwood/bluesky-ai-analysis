@@ -49,7 +49,7 @@ cursor.execute("""
     SELECT uri, text FROM posts
     WHERE embedding IS NULL AND LENGTH(text) > 10 AND langs='en'
     ORDER BY created_date DESC, created_hour DESC
-    LIMIT 10000;
+    LIMIT 30000;
 """)
 rows = cursor.fetchall()
 print(f"Loaded {len(rows)} posts without embeddings.")
