@@ -85,23 +85,24 @@ for day in days:
         print("Finished sqlite query")
         print("rows: ", len(rows))
 
-        df = pd.DataFrame(rows, columns=[
-            "uri", "created_at", "created_date", "created_hour", "text", "embedding_blob"
-        ])
-        print(f"Loaded {len(df)} rows from SQLite")
+        batch_size = 10_000
+        for i in range(0, len(rows), batch_size):
+            chunk = rows[i:i + batch_size]
 
-        print("Memory used: ", psutil.virtual_memory())
-        print(df.memory_usage())
-        print(df.memory_usage(deep=True))
+            df = pd.DataFrame(rows, columns=[
+                "uri", "created_at", "created_date", "created_hour", "text", "embedding_blob"
+            ])
+            print(f"Loaded {len(df)} rows from SQLite")
 
-        df["embedding"] = df["embedding_blob"].apply(decode_embedding)
-        df = df.drop(columns=["embedding_blob"])
-        df["post_url"] = df["uri"].apply(build_live_link)
+            df["embedding"] = df["embedding_blob"].apply(decode_embedding)
+            df = df.drop(columns=["embedding_blob"])
+            df["post_url"] = df["uri"].apply(build_live_link)
 
-        # Export to Parquet
-        filename = f"{OUTPUT_DIR}/posts-{day}-{hour:0>2}.parquet"
-        df.to_parquet(filename, index=False)
-        print(f"Export complete for {day} {hour:0>2}. Rows written:", len(df))
+            # Export to Parquet
+            filename = f"{OUTPUT_DIR}/posts-{day}-{hour:0>2}.{i//batch_size}.parquet"
+            df.to_parquet(filename, index=False)
+            print(f"Wrote {len(df)} rows to {filename}")
+        print(f"Export complete for {day} {hour:0>2}.")
     print(f"Finished with day {day}")
 
 conn.close()
