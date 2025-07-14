@@ -44,6 +44,23 @@ DB_PATH = args.db_path
 CURRENT_DATE = datetime.datetime.strptime(args.current_date, DATE_FORMAT_STRING)
 days = get_date_strings(CURRENT_DATE, DAYS_BACK)
 
+conn = sqlite3.connect(DB_PATH)
+cursor = conn.cursor()
+
+query = f"""
+    SELECT uri, created_at, created_date, created_hour, text, embedding_blob
+    FROM posts
+    WHERE created_date = ?
+    AND created_hour = ?
+    AND embedding_blob IS NOT NULL
+"""
+print("Starting sqlite query")
+cursor.execute(query, ('2025-07-14', 19))
+rows = cursor.fetchall()
+conn.close()
+print("Finished sqlite query")
+print("rows: ", len(rows))
+
 # Connect to DuckDB and attach SQLite
 con = duckdb.connect()
 con.execute("INSTALL sqlite_scanner;")
@@ -65,7 +82,7 @@ con.execute("SET explain_output = 'all';")
 explain_result = con.execute(f"EXPLAIN {query}").fetchall()
 print("Query plan:")
 for row in explain_result:
-    print(row)
+    print(row[1])
 print("Executing query: ", query)
 print("Using dates: ", days)
 df = con.execute(query).fetchdf()
