@@ -9,7 +9,7 @@ from sentence_transformers import SentenceTransformer
 # ----------------------------------------
 DB_PATH = "bluesky_posts.db"
 MODEL_NAME = "all-MiniLM-L6-v2"
-BATCH_SIZE = 64  # Small batches are efficient for local inference
+BATCH_SIZE = 128  # this should be a command line arg soon
 MAX_COMMENT_LEN = 300
 
 # ----------------------------------------
