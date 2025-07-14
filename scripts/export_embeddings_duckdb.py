@@ -60,6 +60,7 @@ query = f"""
         AND created_hour = 19
         AND embedding_blob IS NOT NULL
 """
+print("Getting query plan")
 con.execute("SET explain_output = 'all';")
 explain_result = con.execute(f"EXPLAIN {query}").fetchall()
 print("Query plan:")
