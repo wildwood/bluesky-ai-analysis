@@ -34,9 +34,6 @@ def init_db():
     c.execute('''
         CREATE INDEX IF NOT EXISTS idx_posts_created_date_hour ON posts (created_date, created_hour);
     ''')
-    c.execute('''
-    CREATE INDEX IF NOT EXISTS idx_posts_date_hour_blob ON posts (created_date, created_hour) WHERE embedding_blob IS NOT NULL;
-    ''')
     conn.commit()
     return conn
 
