@@ -89,7 +89,7 @@ for day in days:
         for i in range(0, len(rows), batch_size):
             chunk = rows[i:i + batch_size]
 
-            df = pd.DataFrame(rows, columns=[
+            df = pd.DataFrame(chunk, columns=[
                 "uri", "created_at", "created_date", "created_hour", "text", "embedding_blob"
             ])
             print(f"Loaded {len(df)} rows from SQLite")
