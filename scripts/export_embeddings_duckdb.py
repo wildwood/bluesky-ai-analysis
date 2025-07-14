@@ -14,10 +14,22 @@ def get_date_strings(last_date, numDays):
         days.append(last_date.strftime(DATE_FORMAT_STRING))
     return days
 
+# Convert embedding_blob from binary to list of floats
+def decode_embedding(blob):
+    try:
+        return np.frombuffer(blob, dtype=np.float32).tolist()
+    except Exception:
+        return None
+
+def build_live_link(uri):
+    parts = uri.split('/')
+    handle = parts[2] if len(parts) > 2 else ''
+    post_id = parts[-1] if len(parts) > 3 else ''
+    return f"https://bsky.app/profile/{handle}/post/{post_id}"
 
 DB_PATH = "bluesky_posts.db"
 CURRENT_DATE = datetime.date.today()
-DAYS_BACK = 1#3
+DAYS_BACK = 3
 
 # ----------------------------------------
 # Parse command line
@@ -54,60 +66,28 @@ query = f"""
     AND created_hour = ?
     AND embedding_blob IS NOT NULL
 """
-print("Starting sqlite query")
-cursor.execute(query, ('2025-07-14', 19))
-rows = cursor.fetchall()
+
+for day in days:
+    for hour in range(24):
+        print(f"Starting sqlite query for {day} {hour}")
+        cursor.execute(query, (day, hour))
+        rows = cursor.fetchall()
+        print("Finished sqlite query")
+        print("rows: ", len(rows))
+
+        df = pd.DataFrame(rows, columns=[
+            "uri", "created_at", "created_date", "created_hour", "text", "embedding_blob"
+        ])
+        print(f"Loaded {len(df)} rows from SQLite")
+
+        df["embedding"] = df["embedding_blob"].apply(decode_embedding)
+        df = df.drop(columns=["embedding_blob"])
+        df["post_url"] = df["uri"].apply(build_live_link)
+
+        # Export to Parquet
+        filename = f"posts-{day}-{hour}.parquet"
+        df.to_parquet(filename, index=False)
+        print(f"Export complete for {day} {hour}. Rows written:", len(df))
+    print(f"Finished with day {day}")
+
 conn.close()
-print("Finished sqlite query")
-print("rows: ", len(rows))
-
-# Connect to DuckDB and attach SQLite
-con = duckdb.connect()
-con.execute("INSTALL sqlite_scanner;")
-con.execute("LOAD sqlite_scanner;")
-con.execute(f"ATTACH '{DB_PATH}' AS mydb (TYPE sqlite);")
-
-escaped_days = ', '.join(f"'{d}'" for d in days)
-
-# Query posts from SQLite via DuckDB
-query = f"""
-        SELECT uri, created_at, created_date, created_hour, text, embedding_blob
-        FROM mydb.posts
-        WHERE created_date in ({escaped_days})
-        AND created_hour = 19
-        AND embedding_blob IS NOT NULL
-"""
-print("Getting query plan")
-con.execute("SET explain_output = 'all';")
-explain_result = con.execute(f"EXPLAIN {query}").fetchall()
-print("Query plan:")
-for row in explain_result:
-    print(row[1])
-print("Executing query: ", query)
-print("Using dates: ", days)
-df = con.execute(query).fetchdf()
-print("received rows:", len(df))
-
-# Convert embedding_blob from binary to list of floats
-def decode_embedding(blob):
-    try:
-        return np.frombuffer(blob, dtype=np.float32).tolist()
-    except Exception:
-        return None
-
-df["embedding"] = df["embedding_blob"].apply(decode_embedding)
-df = df.drop(columns=["embedding_blob"])
-
-def build_live_link(uri):
-    parts = uri.split('/')
-    handle = parts[2] if len(parts) > 2 else ''
-    post_id = parts[-1] if len(parts) > 3 else ''
-    return f"https://bsky.app/profile/{handle}/post/{post_id}"
-
-df["post_url"] = df["uri"].apply(build_live_link)
-#df = df.drop(columns={"post_url"})
-
-# Export to Parquet
-filename = f"posts-{CURRENT_DATE.strftime(DATE_FORMAT_STRING)}.parquet"
-df.to_parquet(filename, index=False)
-print("Export complete. Rows written:", len(df))
