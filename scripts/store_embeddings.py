@@ -2,6 +2,7 @@ import argparse
 import logging
 import sqlite3
 import sys
+import time
 
 import numpy as np
 from sentence_transformers import SentenceTransformer
@@ -53,7 +54,7 @@ cursor = conn.cursor()
 # ----------------------------------------
 cursor.execute("""
     SELECT uri, text FROM posts
-    WHERE embedding_blob IS NULL AND LENGTH(text) > 10 AND langs='en'
+    WHERE embedding IS NULL AND LENGTH(text) > 10 AND langs='en'
     ORDER BY created_date DESC, created_hour DESC
     LIMIT 30000;
 """)
@@ -61,7 +62,9 @@ rows = cursor.fetchall()
 logger.info(f"Loaded {len(rows)} posts without embeddings.")
 
 if not rows:
-    logger.info("Nothing to embed — exiting.")
+    sleep_seconds = 60
+    logger.info(f"Nothing to embed — sleeping {sleep_seconds} seconds before exiting.")
+    time.sleep(sleep_seconds)
     exit(0)
 
 # ----------------------------------------
@@ -85,7 +88,7 @@ for i in range(0, len(texts), BATCH_SIZE):
 
         cursor.execute("""
             UPDATE posts
-            SET embedding_blob = ?
+            SET embedding_blob = ?, embedding = 'y'
             WHERE uri = ?
         """, (embedding_blob, uri))
 
