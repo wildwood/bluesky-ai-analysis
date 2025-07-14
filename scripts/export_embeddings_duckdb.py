@@ -91,6 +91,8 @@ for day in days:
         print(f"Loaded {len(df)} rows from SQLite")
 
         print("Memory used: ", psutil.virtual_memory())
+        print(df.memory_usage())
+        print(df.memory_usage(deep=True))
 
         df["embedding"] = df["embedding_blob"].apply(decode_embedding)
         df = df.drop(columns=["embedding_blob"])
