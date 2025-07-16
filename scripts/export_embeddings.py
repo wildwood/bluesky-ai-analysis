@@ -2,6 +2,7 @@ import argparse
 import datetime
 import logging
 import sqlite3
+import sys
 import numpy as np
 import pandas as pd
 
@@ -85,7 +86,7 @@ for day in days:
         cursor.execute(query, (day, hour))
         rows = cursor.fetchall()
         logger.info("Finished sqlite query")
-        logger.info("rows: ", len(rows))
+        logger.info(f"rows: {len(rows)}")
 
         batch_size = 10_000
         for i in range(0, len(rows), batch_size):
