@@ -13,7 +13,7 @@ logger.info("Logger created.")
 
 CONSOLIDATED_DIR = "consolidated"
 
-def consolidate_day(export_dir: str, date_str: str):
+def consolidate_day(export_dir: str, output_subdir: str, date_str: str):
     """
     Consolidate all chunk parquet files for a given date into a single file,
     skipping if the consolidated file is up to date.
@@ -24,11 +24,11 @@ def consolidate_day(export_dir: str, date_str: str):
         logging.info(f"No chunk files for {date_str}, pattern {pattern}")
         return
 
-    if not os.path.exists(os.path.join(export_dir, f"{CONSOLIDATED_DIR}")):
-        logging.info(f"Target directory {CONSOLIDATED_DIR} does not exist")
+    if not os.path.exists(os.path.join(export_dir, f"{output_subdir}")):
+        logging.info(f"Target directory {output_subdir} does not exist")
         return
 
-    consolidated_file = os.path.join(export_dir, f"{CONSOLIDATED_DIR}", f"posts-{date_str}.parquet")
+    consolidated_file = os.path.join(export_dir, f"{output_subdir}", f"posts-{date_str}.parquet")
 
     if os.path.exists(consolidated_file):
         consolidated_mtime = os.path.getmtime(consolidated_file)
@@ -62,6 +62,7 @@ def get_date_strings(last_date, numDays):
 CURRENT_DATE = datetime.date.today()
 DAYS_BACK = 3
 EXPORT_DIR = "."
+CONSOLIDATE_SUBDIR = "consolidated"
 
 # ----------------------------------------
 # Parse command line
@@ -82,13 +83,20 @@ parser.add_argument(
     default= EXPORT_DIR,
     help="Directory for export files.  Needs to already exist."
 )
+parser.add_argument(
+    "--consolidated-subdir",
+    type=str,
+    default= CONSOLIDATE_SUBDIR,
+    help="Subdirectory for consolidated files.  Needs to already exist."
+)
 
 args = parser.parse_args()
 CURRENT_DATE = datetime.datetime.strptime(args.current_date, DATE_FORMAT_STRING)
 days = get_date_strings(CURRENT_DATE, DAYS_BACK)
 EXPORT_DIR = args.export_dir
+CONSOLIDATE_SUBDIR = args.consolidated_subdir
 
 for day in days:
-    logger.info(f"Consolidating {day} data in {EXPORT_DIR}")
-    consolidate_day(EXPORT_DIR, day)
+    logger.info(f"Consolidating {day} data in {EXPORT_DIR} into {CONSOLIDATE_SUBDIR}")
+    consolidate_day(EXPORT_DIR, CONSOLIDATE_SUBDIR, day)
 
