@@ -18,7 +18,7 @@ def consolidate_day(export_dir: str, date_str: str):
     Consolidate all chunk parquet files for a given date into a single file,
     skipping if the consolidated file is up to date.
     """
-    pattern = os.path.join(export_dir, f"/posts-{date_str}-*.parquet")
+    pattern = os.path.join(export_dir, f"posts-{date_str}-*.parquet")
     chunk_files = glob.glob(pattern)
     if not chunk_files:
         logging.info(f"No chunk files for {date_str}, pattern {pattern}")
@@ -89,5 +89,6 @@ days = get_date_strings(CURRENT_DATE, DAYS_BACK)
 EXPORT_DIR = args.export_dir
 
 for day in days:
+    logger.info(f"Consolidating {day} data in {EXPORT_DIR}")
     consolidate_day(EXPORT_DIR, day)
 
