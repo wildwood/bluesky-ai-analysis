@@ -24,11 +24,11 @@ def consolidate_day(export_dir: str, date_str: str):
         logging.info(f"No chunk files for {date_str}, pattern {pattern}")
         return
 
-    if not os.path.exists(os.path.join(export_dir, f"/{CONSOLIDATED_DIR}/")):
+    if not os.path.exists(os.path.join(export_dir, f"{CONSOLIDATED_DIR}")):
         logging.info(f"Target directory {CONSOLIDATED_DIR} does not exist")
         return
 
-    consolidated_file = os.path.join(export_dir, f"/{CONSOLIDATED_DIR}/posts-{date_str}.parquet")
+    consolidated_file = os.path.join(export_dir, f"{CONSOLIDATED_DIR}", f"posts-{date_str}.parquet")
 
     if os.path.exists(consolidated_file):
         consolidated_mtime = os.path.getmtime(consolidated_file)
