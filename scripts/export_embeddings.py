@@ -1,11 +1,13 @@
 import argparse
 import datetime
-import duckdb
+import logging
 import sqlite3
 import numpy as np
 import pandas as pd
 
-import psutil
+logging.basicConfig(stream=sys.stdout, level=logging.INFO, format='%(asctime)s - %(levelname)s - %(message)s')
+logger = logging.getLogger(__name__)
+logger.info("Logger created.")
 
 DATE_FORMAT_STRING = "%Y-%m-%d"
 
@@ -79,11 +81,11 @@ query = f"""
 
 for day in days:
     for hour in range(24):
-        print(f"Starting sqlite query for {day} {hour:0>2}")
+        logger.info(f"Starting sqlite query for {day} {hour:0>2}")
         cursor.execute(query, (day, hour))
         rows = cursor.fetchall()
-        print("Finished sqlite query")
-        print("rows: ", len(rows))
+        logger.info("Finished sqlite query")
+        logger.info("rows: ", len(rows))
 
         batch_size = 10_000
         for i in range(0, len(rows), batch_size):
@@ -92,7 +94,7 @@ for day in days:
             df = pd.DataFrame(chunk, columns=[
                 "uri", "created_at", "created_date", "created_hour", "text", "embedding_blob"
             ])
-            print(f"Loaded {len(df)} rows from SQLite")
+            logger.info(f"Loaded {len(df)} rows from SQLite")
 
             df["embedding"] = df["embedding_blob"].apply(decode_embedding)
             df = df.drop(columns=["embedding_blob"])
@@ -101,8 +103,8 @@ for day in days:
             # Export to Parquet
             filename = f"{OUTPUT_DIR}/posts-{day}-{hour:0>2}.{i//batch_size}.parquet"
             df.to_parquet(filename, index=False)
-            print(f"Wrote {len(df)} rows to {filename}")
-        print(f"Export complete for {day} {hour:0>2}.")
-    print(f"Finished with day {day}")
+            logger.info(f"Wrote {len(df)} rows to {filename}")
+        logger.info(f"Export complete for {day} {hour:0>2}.")
+    logger.info(f"Finished with day {day}")
 
 conn.close()
