@@ -1,7 +1,11 @@
 import argparse
 import datetime
+import duckdb
 import sqlite3
+import numpy as np
 import pandas as pd
+
+import psutil
 
 DATE_FORMAT_STRING = "%Y-%m-%d"
 
@@ -12,10 +16,23 @@ def get_date_strings(last_date, numDays):
         days.append(last_date.strftime(DATE_FORMAT_STRING))
     return days
 
+# Convert embedding_blob from binary to list of floats
+def decode_embedding(blob):
+    try:
+        return np.frombuffer(blob, dtype=np.float32).tolist()
+    except Exception:
+        return None
+
+def build_live_link(uri):
+    parts = uri.split('/')
+    handle = parts[2] if len(parts) > 2 else ''
+    post_id = parts[-1] if len(parts) > 3 else ''
+    return f"https://bsky.app/profile/{handle}/post/{post_id}"
 
 DB_PATH = "bluesky_posts.db"
 CURRENT_DATE = datetime.date.today()
 DAYS_BACK = 3
+OUTPUT_DIR = "."
 
 # ----------------------------------------
 # Parse command line
@@ -36,54 +53,56 @@ parser.add_argument(
     default=CURRENT_DATE.strftime(DATE_FORMAT_STRING),
     help="Latest date to start export from.  ('YYYY-MM-DD')"
 )
+parser.add_argument(
+    "--output-dir",
+    type=str,
+    default= OUTPUT_DIR,
+    help="Directory for output files.  Needs to already exist."
+)
 
 args = parser.parse_args()
 DB_PATH = args.db_path
 CURRENT_DATE = datetime.datetime.strptime(args.current_date, DATE_FORMAT_STRING)
 days = get_date_strings(CURRENT_DATE, DAYS_BACK)
+OUTPUT_DIR = args.output_dir
 
-# Connect to the SQLite database
 conn = sqlite3.connect(DB_PATH)
 cursor = conn.cursor()
 
-placeholders = ','.join('?' for _ in days)
+query = f"""
+    SELECT uri, created_at, created_date, created_hour, text, embedding_blob
+    FROM posts
+    WHERE created_date = ?
+    AND created_hour = ?
+    AND embedding_blob IS NOT NULL
+"""
 
-# Run the query
-cursor.execute(f"""
-SELECT uri, created_at, created_date, created_hour, text, embedding_blob
-FROM posts
-WHERE embedding_blob IS NOT NULL
-AND LANGS='en'
-AND created_date IN ({placeholders})
-""", days)
+for day in days:
+    for hour in range(24):
+        print(f"Starting sqlite query for {day} {hour:0>2}")
+        cursor.execute(query, (day, hour))
+        rows = cursor.fetchall()
+        print("Finished sqlite query")
+        print("rows: ", len(rows))
 
-# Process rows
-rows = cursor.fetchall()
-data = []
+        batch_size = 10_000
+        for i in range(0, len(rows), batch_size):
+            chunk = rows[i:i + batch_size]
 
-for row in rows:
-    uri, created_at, created_date, created_hour, text, blob = row
-    try:
-        embedding = list(memoryview(blob).cast('f'))
-    except Exception:
-        embedding = None
-    parts = uri.split('/')
-    handle = parts[2] if len(parts) > 2 else ''
-    post_id = parts[-1] if len(parts) > 3 else ''
-    url = f"https://bsky.app/profile/{handle}/post/{post_id}"
-    data.append({
-        "uri": uri,
-        "post_url": url,
-        "created_at": created_at,
-        "created_date": created_date,
-        "created_hour": created_hour,
-        "text": text,
-        "embedding": embedding
-    })
+            df = pd.DataFrame(chunk, columns=[
+                "uri", "created_at", "created_date", "created_hour", "text", "embedding_blob"
+            ])
+            print(f"Loaded {len(df)} rows from SQLite")
 
-# Create DataFrame
-df = pd.DataFrame(data)
+            df["embedding"] = df["embedding_blob"].apply(decode_embedding)
+            df = df.drop(columns=["embedding_blob"])
+            df["post_url"] = df["uri"].apply(build_live_link)
 
-# Save to Parquet
-print(f"Exporting {len(df)} rows to Parquet")
-df.to_parquet("exported_posts.parquet", index=False)
+            # Export to Parquet
+            filename = f"{OUTPUT_DIR}/posts-{day}-{hour:0>2}.{i//batch_size}.parquet"
+            df.to_parquet(filename, index=False)
+            print(f"Wrote {len(df)} rows to {filename}")
+        print(f"Export complete for {day} {hour:0>2}.")
+    print(f"Finished with day {day}")
+
+conn.close()
