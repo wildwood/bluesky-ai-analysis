@@ -8,3 +8,6 @@ LOG_DIR=/mnt/ingestion/logs
 
 # Export embeddings to parquet every day at 11am and 11pm
 0 11,23 * * * cd $WORKING_DIR && source $VIRTUAL_ENV/bin/activate && python scripts/export_embeddings.py --db-path $DATABASE_PATH --output-dir $EXPORT_DIR >> $LOG_DIR/export.log 2>&1
+
+# Consolidate embeddings
+*/20 * * * * cd $WORKING_DIR && source $VIRTUAL_ENV/bin/activate && python scripts/consolidate_exports.py --export-dir $EXPORT_DIR >> $LOG_DIR/consolidate.log 2>&1
