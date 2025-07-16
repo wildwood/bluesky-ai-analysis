@@ -21,7 +21,7 @@ def consolidate_day(export_dir: str, date_str: str):
     pattern = os.path.join(export_dir, f"/posts-{date_str}-*.parquet")
     chunk_files = glob.glob(pattern)
     if not chunk_files:
-        logging.info(f"No chunk files for {date_str}")
+        logging.info(f"No chunk files for {date_str}, pattern {pattern}")
         return
 
     if not os.path.exists(os.path.join(export_dir, f"/{CONSOLIDATED_DIR}/")):
