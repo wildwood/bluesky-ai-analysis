@@ -3,6 +3,7 @@ WORKING_DIR=/home/blueskai/bluesky-ai-analysis
 DATABASE_PATH=/mnt/ingestion/database/bluesky_posts.db
 EXPORT_DIR=/mnt/ingestion/exports
 CONSOLIDATED_SUBDIR=bluesky-embeddings-daily
+HUGGINGFACE_REPO=wildwood77/bluesky-embeddings-daily
 VIRTUAL_ENV=.venv
 VIRTUAL_ENV_HF=.venv-torch
 LOG_DIR=/mnt/ingestion/logs
@@ -12,3 +13,6 @@ LOG_DIR=/mnt/ingestion/logs
 
 # Consolidate embeddings
 */20 * * * * cd $WORKING_DIR && source $VIRTUAL_ENV/bin/activate && python scripts/consolidate_exports.py --export-dir $EXPORT_DIR --consolidated-subdir $CONSOLIDATED_SUBDIR >> $LOG_DIR/consolidate.log 2>&1
+
+# Upload to huggingface
+45 */2 * * * cd $EXPORT_DIR/$CONSOLIDATED_DIR && source $WORKING_DIR/$VIRTUAL_ENV/bin/activate && huggingface-cli upload $HUGGINGFACE_REPO . --repo-type=dataset >> $LOG_DIR/huggingface.log 2>&1
