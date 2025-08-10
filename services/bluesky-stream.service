@@ -8,7 +8,7 @@ Type=simple
 Restart=always
 RestartSec=2
 WorkingDirectory=/home/blueskai/bluesky-ai-analysis
-ExecStart=/home/blueskai/bluesky-ai-analysis/.venv/bin/python scripts/jetstream_to_ndjson.py --outdir /mnt/ingestion/jetstream
+ExecStart=/home/blueskai/bluesky-ai-analysis/.venv/bin/python scripts/stream_to_file.py --outdir /mnt/ingestion/jetstream
 Environment=PYTHONUNBUFFERED=1
 # headroom for many open hourly files
 LimitNOFILE=32768
