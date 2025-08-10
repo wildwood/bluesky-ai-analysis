@@ -1,0 +1,15 @@
+[Unit]
+Description=Import NDJSON -> per-day SQLite
+After=network-online.target
+
+[Service]
+Type=oneshot
+WorkingDirectory=/home/blueskai/bluesky-ai-analysis
+# prevent overlapping runs
+ExecStart=/usr/bin/flock -n /run/bsky-import.lock \
+  /home/blueskai/bluesky-ai-analysis/.venv/bin/python scripts/import_day.py \
+    --indir /mnt/ingestion/jetstream \
+    --outdir /mnt/ingestion/database \
+    --state state \
+    --batch 2000
+Environment=PYTHONUNBUFFERED=1

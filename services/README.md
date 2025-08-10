@@ -45,6 +45,13 @@ sudo journalctl -u bluesky-ingest -f
 
 sudo systemctl enable bluesky-ingest
 
+5️⃣ Enable a
+
+sudo systemctl daemon-reload
+sudo systemctl enable --now bsky-stream.service
+sudo systemctl enable --now bsky-import.timer
+
+
 6️⃣ Common commands
 
 Command                                 Purpose
@@ -53,6 +60,7 @@ sudo systemctl stop yourservice	    Stop it now
 sudo systemctl restart yourservice	Restart after edits
 sudo systemctl status yourservice	See status & recent logs
 sudo journalctl -u yourservice -f	Follow logs in real time
+sudo systemctl enable yourservice   Set service to restart on boot
 
 ⚡️ Tips
 ✅ Always daemon-reload after editing .service files.
