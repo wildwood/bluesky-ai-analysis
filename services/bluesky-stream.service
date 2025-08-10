@@ -1,0 +1,17 @@
+[Unit]
+Description=Bluesky Jetstream -> NDJSON
+After=network-online.target
+Wants=network-online.target
+
+[Service]
+Type=simple
+Restart=always
+RestartSec=2
+WorkingDirectory=/home/blueskai/bluesky-ai-analysis
+ExecStart=/home/blueskai/bluesky-ai-analysis/.venv/bin/python scripts/jetstream_to_ndjson.py --outdir /mnt/ingestion/jetstream
+Environment=PYTHONUNBUFFERED=1
+# headroom for many open hourly files
+LimitNOFILE=32768
+
+[Install]
+WantedBy=multi-user.target
