@@ -7,7 +7,7 @@ Type=oneshot
 WorkingDirectory=/home/blueskai/bluesky-ai-analysis
 # prevent overlapping runs
 ExecStart=/usr/bin/flock -n /run/bsky-import.lock \
-  /home/blueskai/bluesky-ai-analysis/.venv/bin/python scripts/import_day.py \
+  /home/blueskai/bluesky-ai-analysis/.venv/bin/python scripts/file_to_db.py \
     --indir /mnt/ingestion/jetstream \
     --outdir /mnt/ingestion/database \
     --state state \
