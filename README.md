@@ -9,7 +9,8 @@
 
 ## 📂 Project structure
 
-- `ingest.py` — Jetstream listener
+- `stream_to_file.py` — Jetstream listener outputs to json
+- `file_to_db.py` - load json into sqlite
 - `embed.py` — Embedding batch script
 - `build_faiss.py` — Creates FAISS index
 - `search.py` — Query FAISS for nearest posts
